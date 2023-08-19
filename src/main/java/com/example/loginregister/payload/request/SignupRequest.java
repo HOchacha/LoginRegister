@@ -14,10 +14,10 @@ public class SignupRequest {
     @NotBlank
     private String username;
     private String email;
-    private Set<String> role;
     private String password;
     private String name;
     private String schoolName;
+    private Set<String> roles;
 
 
 }

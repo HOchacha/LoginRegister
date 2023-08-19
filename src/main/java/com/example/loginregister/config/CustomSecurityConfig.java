@@ -25,10 +25,8 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Log4j2
 @Configuration
-
 @EnableWebSecurity
 public class CustomSecurityConfig {
-
     private UserDetailsServiceImpl userDetailsService;
     private AuthEntryPointJwt unauthorizedHandler;
     private JwtUtils jwtUtils;
@@ -46,11 +44,6 @@ public class CustomSecurityConfig {
         return a;
     }
 
-//  @Override
-//  public void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
-//    authenticationManagerBuilder.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
-//  }
-
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -60,8 +53,6 @@ public class CustomSecurityConfig {
 
         return authProvider;
     }
-
-
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {

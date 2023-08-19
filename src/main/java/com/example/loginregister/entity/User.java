@@ -1,24 +1,22 @@
 package com.example.loginregister.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.data.mongodb.core.mapping.Document;
-
 import java.util.HashSet;
 import java.util.Set;
 
-@Document()
-@NoArgsConstructor
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
+import lombok.Data;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "users")
 @Data
-@AllArgsConstructor
 public class User {
     @Id
-    @GeneratedValue
-    private Long id;
+    private String id;
 
     @NotBlank
     @Size(max = 20)
@@ -32,6 +30,21 @@ public class User {
     @Size(max = 30)
     private String name;
 
+    @NotBlank
+    @Size(max = 50)
+    @Email
+    private String email;
+
+    @NotBlank
+    @Size(max = 40)
+    private String schoolName;
+
+    @DBRef
+    private Set<Role> roles = new HashSet<>();
+
+    public User(){
+    }
+
     public User(String username, String password, String name, String email, String schoolName) {
         this.username = username;
         this.password = password;
@@ -39,21 +52,5 @@ public class User {
         this.email = email;
         this.schoolName = schoolName;
     }
-
-    @NotBlank
-    @Size(max = 40)
-    private String email;
-
-    @NotBlank
-    @Size(max = 40)
-    private String schoolName;
-
-    @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id"))
-    private Set<Role> roles = new HashSet<>();
-
-
 
 }
