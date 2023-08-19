@@ -12,7 +12,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 @RequiredArgsConstructor
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "", description = "", version = ""))
-@EnableWebSecurity
 public class SwaggerConfig {
     @Bean
     public OpenAPI OpenApi(){

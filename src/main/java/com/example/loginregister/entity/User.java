@@ -1,34 +1,59 @@
 package com.example.loginregister.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AccessLevel;
-import lombok.Getter;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
-@Entity
-@Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@EnableJpaAuditing
-@Document(collection = "users")
+@Document()
+@NoArgsConstructor
+@Data
+@AllArgsConstructor
 public class User {
     @Id
-    private String username;
-    //username == id
+    @GeneratedValue
+    private Long id;
 
+    @NotBlank
+    @Size(max = 20)
+    private String username;
+
+    @NotBlank
+    @Size(max = 120)
     private String password;
 
-
+    @NotBlank
+    @Size(max = 30)
     private String name;
-    private String schoolName;
+
+    public User(String username, String password, String name, String email, String schoolName) {
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+        this.schoolName = schoolName;
+    }
+
+    @NotBlank
+    @Size(max = 40)
     private String email;
+
+    @NotBlank
+    @Size(max = 40)
+    private String schoolName;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "user_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles = new HashSet<>();
+
+
 
 }

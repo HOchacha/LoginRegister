@@ -1,6 +1,6 @@
 package com.example.loginregister.filter;
 
-import com.example.loginregister.dto.LoginRequest;
+import com.example.loginregister.payload.request.LoginRequest;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
