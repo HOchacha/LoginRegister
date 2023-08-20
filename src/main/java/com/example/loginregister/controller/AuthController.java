@@ -11,6 +11,8 @@ import com.example.loginregister.repository.RoleRepository;
 import com.example.loginregister.repository.UserCollectionRepo;
 import com.example.loginregister.security.service.UserDetailsImpl;
 import com.example.loginregister.security.jwt.JwtUtils;
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
+import io.swagger.v3.oas.annotations.info.Info;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 @Controller
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RequestMapping("/api/auth")
+@OpenAPIDefinition(info = @Info(title = "Login Authorization", description = "Sign I/O & up", version = "v1"))
 public class AuthController {
     AuthenticationManager authenticationManager;
     UserCollectionRepo userCollectionRepo;
@@ -51,10 +54,10 @@ public class AuthController {
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         log.info(loginRequest);
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
         log.info(authentication);
         SecurityContextHolder.getContext().setAuthentication(authentication);
+        log.info(SecurityContextHolder.getContext());
         String jwt = jwtUtils.generateJwtToken(authentication);
         log.info(jwt);
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
