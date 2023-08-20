@@ -8,14 +8,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-
+/*
 @RequiredArgsConstructor
 @Configuration
 @OpenAPIDefinition(info = @Info(title = "", description = "", version = ""))
 public class SwaggerConfig {
     @Bean
     public OpenAPI OpenApi(){
-        String[] paths = {"/**"};
+        String[] paths = {"/api/auth", "/api/test"};
         return new OpenAPI();
     }
 }
+*/

@@ -24,12 +24,12 @@ public class JwtUtils {
     @Value("HochachaCodingdasadasdd=============================================")
     private String jwtSecret;
 
-    @Value("30000")
+    @Value("86400000")
     private int jwtExpirationMs;
     public String generateJwtToken(Authentication authentication) {
-
+        log.info(authentication);
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
-
+        log.info(userPrincipal);
         return Jwts.builder()
                 .setSubject((userPrincipal.getUsername()))
                 .setIssuedAt(new Date())
@@ -49,6 +49,7 @@ public class JwtUtils {
 
     public boolean validateJwtToken(String authToken) {
         try {
+            log.info(authToken);
             Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
             return true;
         } catch (MalformedJwtException e) {
