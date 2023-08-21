@@ -3,14 +3,19 @@ package com.example.loginregister.controller;
 import com.example.loginregister.entity.ERole;
 import com.example.loginregister.entity.Role;
 import com.example.loginregister.entity.User;
+import com.example.loginregister.entity.RefreshToken;
+import com.example.loginregister.exception.TokenRefreshException;
 import com.example.loginregister.payload.request.LoginRequest;
 import com.example.loginregister.payload.request.SignupRequest;
+import com.example.loginregister.payload.request.TokenRefreshRequest;
 import com.example.loginregister.payload.response.MessageResponse;
 import com.example.loginregister.payload.response.JwtResponse;
+import com.example.loginregister.payload.response.TokenRefreshResponse;
 import com.example.loginregister.repository.RoleRepository;
 import com.example.loginregister.repository.UserCollectionRepo;
 import com.example.loginregister.security.service.UserDetailsImpl;
 import com.example.loginregister.security.jwt.JwtUtils;
+import com.example.loginregister.service.RefreshTokenService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Info;
 import jakarta.validation.Valid;
@@ -37,13 +42,15 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/auth")
 @OpenAPIDefinition(info = @Info(title = "Login Authorization", description = "Sign I/O & up", version = "v1"))
 public class AuthController {
+    RefreshTokenService refreshTokenService;
     AuthenticationManager authenticationManager;
     UserCollectionRepo userCollectionRepo;
     RoleRepository roleRepository;
     PasswordEncoder passwordEncoder;
     JwtUtils jwtUtils;
     @Autowired
-    public AuthController(AuthenticationManager authenticationManager, UserCollectionRepo userCollectionRepo, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+    public AuthController(RefreshTokenService refreshTokenService, AuthenticationManager authenticationManager, UserCollectionRepo userCollectionRepo, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+        this.refreshTokenService = refreshTokenService;
         this.authenticationManager = authenticationManager;
         this.userCollectionRepo = userCollectionRepo;
         this.roleRepository = roleRepository;
@@ -65,11 +72,32 @@ public class AuthController {
                 .map(item -> item.getAuthority())
                 .collect(Collectors.toList());
 
-        return ResponseEntity.ok(new JwtResponse(jwt,
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        log.info(refreshToken);
+        User user = userCollectionRepo.findByUsername(userDetails.getUsername()).get();
+        return ResponseEntity.ok(
+                new JwtResponse(jwt,
+                refreshToken.getToken(),
                 userDetails.getId(),
                 userDetails.getUsername(),
                 userDetails.getEmail(),
-                roles));
+                user.getSchoolName())
+        );
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refreshtoken(@Valid @RequestBody TokenRefreshRequest request) {
+        String requestRefreshToken = request.getRefreshToken();
+
+        return refreshTokenService.findByToken(requestRefreshToken)
+                .map(refreshTokenService::verifyExpiration)
+                .map(RefreshToken::getUser)
+                .map(user -> {
+                    String token = jwtUtils.generateTokenFromUsername(user.getUsername());
+                    return ResponseEntity.ok(new TokenRefreshResponse(token, requestRefreshToken));
+                })
+                .orElseThrow(() -> new TokenRefreshException(requestRefreshToken,
+                        "Refresh token is not in database!"));
     }
 
     @PostMapping("/signup")
@@ -128,7 +156,13 @@ public class AuthController {
 
         user.setRoles(roles);
         userCollectionRepo.save(user);
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getUsername(), user.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
+        log.info(jwt);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getId());
+        return ResponseEntity.ok(new JwtResponse(jwt,refreshToken.getToken(), user.getId(),user.getUsername(), user.getEmail(),  user.getSchoolName()));
     }
 }
