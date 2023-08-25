@@ -1,5 +1,6 @@
 package com.example.loginregister.security.jwt;
 
+import com.example.loginregister.exception.InvalidJwtTokenException;
 import com.example.loginregister.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -49,25 +50,26 @@ public class JwtUtils {
                 .parseClaimsJws(token).getBody().getSubject();
     }
 
-    public boolean validateJwtToken(String authToken) {
+    public void validateJwtToken(String authToken) {
         try {
             log.info(authToken);
             Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
-            return true;
         } catch (MalformedJwtException e) {
             log.error("Invalid JWT token: {}", e.getMessage());
+            throw new InvalidJwtTokenException("Invalid Jwt Token");
         } catch (ExpiredJwtException e) {
             log.error("JWT token is expired: {}", e.getMessage());
+            throw new InvalidJwtTokenException("Jwt Token is expired");
         } catch (UnsupportedJwtException e) {
             log.error("JWT token is unsupported: {}", e.getMessage());
+            throw new InvalidJwtTokenException("Jwt token is unsupported");
         } catch (IllegalArgumentException e) {
             log.error("JWT claims string is empty: {}", e.getMessage());
+            throw new InvalidJwtTokenException("Jwt claims string is empty");
         }
-
-        return false;
     }
 
-    public String generateTokenFromUsername(String username) {
+        public String generateTokenFromUsername(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
