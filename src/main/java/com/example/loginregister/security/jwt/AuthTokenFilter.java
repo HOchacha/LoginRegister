@@ -1,5 +1,6 @@
 package com.example.loginregister.security.jwt;
 
+import com.example.loginregister.exception.InvalidJwtTokenException;
 import com.example.loginregister.security.service.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,11 +30,11 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        try {
 
             String jwt = parseJwt(request);
             log.info(jwt);
-            if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+            if (jwt != null) {
+                jwtUtils.validateJwtToken(jwt);
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 log.info(username);
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
@@ -46,21 +47,15 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info(SecurityContextHolder.getContext());
             }
-        } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e);
-        }
-
+        //401 에러 혹은 JWT 인증 처리를 어디에서 할 것인지 의논해야 함
         filterChain.doFilter(request, response);
     }
 
     private String parseJwt(HttpServletRequest request) {
         String headerAuth = request.getHeader("Authorization");
-
         if (StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer ")) {
             return headerAuth.substring(7, headerAuth.length());
         }
-
         return null;
     }
-
 }

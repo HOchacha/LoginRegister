@@ -1,4 +1,4 @@
-package com.example.loginregister.service;
+package com.example.loginregister.security.service;
 
 import com.example.loginregister.entity.RefreshToken;
 import com.example.loginregister.entity.User;
@@ -6,6 +6,7 @@ import com.example.loginregister.exception.TokenRefreshException;
 import com.example.loginregister.repository.RefreshTokenRepo;
 import com.example.loginregister.repository.UserCollectionRepo;
 import jakarta.transaction.Transactional;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@Log4j2
 public class RefreshTokenService {
     @Value("${refreshTokenExpirationMs}")
     private Long refreshTokenDurationMs;
@@ -28,6 +30,7 @@ public class RefreshTokenService {
     private UserCollectionRepo userCollectionRepo;
 
     public Optional<RefreshToken> findByToken(String token){
+        log.info(token);
         return refreshTokenRepo.findByToken(token);
     }
     public RefreshToken createRefreshToken(String userId) {
