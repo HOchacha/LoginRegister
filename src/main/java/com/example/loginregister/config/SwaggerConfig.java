@@ -16,5 +16,8 @@ import org.springframework.security.core.context.SecurityContext;
 @RequiredArgsConstructor
 @Configuration
 public class SwaggerConfig {
-
+    @Bean
+    public OpenAPI OpenApi(){
+        return new OpenAPI().info(new Info());
+    }
 }

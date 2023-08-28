@@ -11,11 +11,8 @@ import com.example.loginregister.payload.request.TokenRefreshRequest;
 import com.example.loginregister.payload.response.MessageResponse;
 import com.example.loginregister.payload.response.JwtResponse;
 import com.example.loginregister.payload.response.TokenRefreshResponse;
-import com.example.loginregister.repository.RoleRepository;
-import com.example.loginregister.repository.UserCollectionRepo;
 import com.example.loginregister.security.jwt.JwtUtils;
 import com.example.loginregister.security.service.RefreshTokenService;
-import com.example.loginregister.security.service.UserDetailsServiceImpl;
 import com.example.loginregister.service.AuthenticationService;
 import com.example.loginregister.service.UserService;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
@@ -24,8 +21,6 @@ import jakarta.validation.Valid;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,25 +33,15 @@ import java.util.Optional;
 @OpenAPIDefinition(info = @Info(title = "Login Authorization", description = "Sign I/O & up", version = "v1"))
 public class AuthController {
     RefreshTokenService refreshTokenService;
-    AuthenticationManager authenticationManager;
-    UserCollectionRepo userCollectionRepo;
-    RoleRepository roleRepository;
-    PasswordEncoder passwordEncoder;
     JwtUtils jwtUtils;
     AuthenticationService authenticationService;
     UserService userService;
 
-    UserDetailsServiceImpl userDetailsService;
     @Autowired
-    public AuthController(UserDetailsServiceImpl userDetailsService,UserService userService, RefreshTokenService refreshTokenService, AuthenticationService authenticationService, AuthenticationManager authenticationManager, UserCollectionRepo userCollectionRepo, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JwtUtils jwtUtils) {
+    public AuthController(UserService userService, RefreshTokenService refreshTokenService, AuthenticationService authenticationService, JwtUtils jwtUtils) {
         this.refreshTokenService = refreshTokenService;
-        this.authenticationManager = authenticationManager;
-        this.userCollectionRepo = userCollectionRepo;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
         this.jwtUtils = jwtUtils;
         this.authenticationService = authenticationService;
-        this.userDetailsService = userDetailsService;
         this.userService = userService;
     }
 
