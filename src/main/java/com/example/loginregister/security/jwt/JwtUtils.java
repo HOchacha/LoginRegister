@@ -1,6 +1,9 @@
 package com.example.loginregister.security.jwt;
 
+import com.example.loginregister.exception.ExpiredJwtTokenException;
 import com.example.loginregister.exception.InvalidJwtTokenException;
+import com.example.loginregister.exception.InvalidJwtTokenExceptionImpl;
+import com.example.loginregister.exception.UnsupportedJwtExceptionImpl;
 import com.example.loginregister.security.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
@@ -11,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import org.springframework.web.util.WebUtils;
@@ -51,24 +55,8 @@ public class JwtUtils {
     }
 
     public void validateJwtToken(String authToken) {
-        try {
-            log.info(authToken);
-            Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
-        } catch (MalformedJwtException e) {
-            log.error("Invalid JWT token: {}", e.getMessage());
-            throw new InvalidJwtTokenException("Invalid Jwt Token");
-        } catch (ExpiredJwtException e) {
-            log.error("JWT token is expired: {}", e.getMessage());
-            throw new InvalidJwtTokenException("Jwt Token is expired");
-        } catch (UnsupportedJwtException e) {
-            log.error("JWT token is unsupported: {}", e.getMessage());
-            throw new InvalidJwtTokenException("Jwt token is unsupported");
-        } catch (IllegalArgumentException e) {
-            log.error("JWT claims string is empty: {}", e.getMessage());
-            throw new InvalidJwtTokenException("Jwt claims string is empty");
-        }
+        Jwts.parserBuilder().setSigningKey(key()).build().parse(authToken);
     }
-
         public String generateTokenFromUsername(String username) {
         return Jwts.builder()
                 .setSubject(username)

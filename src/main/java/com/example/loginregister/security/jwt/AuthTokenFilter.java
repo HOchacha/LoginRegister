@@ -2,6 +2,7 @@ package com.example.loginregister.security.jwt;
 
 import com.example.loginregister.exception.InvalidJwtTokenException;
 import com.example.loginregister.security.service.UserDetailsServiceImpl;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +31,7 @@ public class AuthTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-
+        try {
             String jwt = parseJwt(request);
             log.info(jwt);
             if (jwt != null) {
@@ -47,8 +48,10 @@ public class AuthTokenFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 log.info(SecurityContextHolder.getContext());
             }
-        //401 에러 혹은 JWT 인증 처리를 어디에서 할 것인지 의논해야 함
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+        }catch(ExpiredJwtException e) {
+            throw e;
+        }
     }
 
     private String parseJwt(HttpServletRequest request) {
